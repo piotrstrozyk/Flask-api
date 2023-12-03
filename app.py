@@ -15,7 +15,7 @@ password = os.getenv("PASSWORD")
 driver = GraphDatabase.driver(uri, auth=("neo4j", password), database="neo4j")
 
 departments = Blueprint('departments', __name__)
-empl = Blueprint('departments', __name__)
+empl = Blueprint('employees', __name__)
 
 #3 ////////////////////////////////////////////////////////////////////////////
 
@@ -181,7 +181,7 @@ def getEmployeeSubordinatesRoute(person):
     surname = person1[1]
     with driver.session() as session:
         employees = session.read_transaction(
-            get_employee_subordinates, name, surname)
+            getEmployeeSubordinates, name, surname)
     res = {'employees': employees}
     return jsonify(res)
 
@@ -235,7 +235,7 @@ def getDepartments(tx, sort: str = '', sortType: str = '', filter: str = '', fil
                (m:Employee)-[r:WORKS_IN]-(d:Department)
                RETURN d.name ORDER BY count(m) DESC"""
     if (filterType == 'name'):
-        query = f"MATCH (m:Department) WHERE m.name CONTAINS '{filtr}' RETURN m"
+        query = f"MATCH (m:Department) WHERE m.name CONTAINS '{filter}' RETURN m"
     if (filterType == 'numberOfEmployees'):
         query = f"""MATCH 
                (m:Employee)-[r:WORKS_IN]-(d:Department)
@@ -274,6 +274,7 @@ def getDepartmentRouteFromDepartment(name: str):
 
 #//////////////////////////////////////////////////////////
 app.register_blueprint(empl)
+app.register_blueprint(departments)
 
 
 @app.route('/')
